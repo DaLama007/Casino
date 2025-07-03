@@ -15,11 +15,11 @@ class Blackjack:
         type = random.randint(1,4)
         rank = random.randint(1,13)
         card = "card_"+str(type)+"_"+str(rank)+".png"
-        self.points_player+=1
+        self.points_player+=rank
         return card
 
-    def hit():
-        pass
+    def hit(self):
+        return self.get_card_user()
 
     def double():
         pass
