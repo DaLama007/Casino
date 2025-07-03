@@ -45,7 +45,7 @@ class Main(QMainWindow):
                 background-color: #3399ff; /* Lighter background color for buttons on hover */
             }
         """)
-        self.info_label = QLabel()
+        #self.label_result = QLabel("Hello").setAlignment(Qt.AlignCenter)
 
         central_widget = QWidget()
         userMoney = QLabel("Money")
@@ -65,6 +65,20 @@ class Main(QMainWindow):
             userCard = QLabel()
             userCard.setPixmap(scaled_back_card)
             self.userCards.append(userCard)
+        
+        #DEALER CARDS
+
+        image_card = QPixmap('Cards/card_extra_back_2.png')
+        scaled_back_card = image_card.scaled(image_card.width() * 4, image_card.height() * 4)
+
+        self.dealerCards = []
+
+        for i in range(0,6):
+            dealerCard = QLabel()
+            dealerCard.setPixmap(scaled_back_card)
+            self.dealerCards.append(dealerCard)
+
+        #----------------------------------
 
         Instruction1 = QLabel("H for Hit")
         Instruction2 = QLabel("S for Stand")
@@ -87,6 +101,8 @@ class Main(QMainWindow):
         self.row6.addWidget(self.button_bet)
         for card in self.userCards:
             self.row5.addWidget(card)
+        for card in self.dealerCards:
+            self.row1.addWidget(card)
         self.row5.addWidget(current_bet)
         self.row5.addWidget(self.current_bet_display)
         self.row7.addWidget(Instruction1)
@@ -97,6 +113,8 @@ class Main(QMainWindow):
         self.row5.setContentsMargins(0, 0, 0, 0)
 
         master= QVBoxLayout()
+        result= QVBoxLayout()
+        #result.addWidget(self.label_result, alignment=Qt.AlignCenter)
         master.addLayout(self.row1)
         master.addLayout(self.row2)
         master.addLayout(self.row3)
@@ -104,6 +122,7 @@ class Main(QMainWindow):
         master.addLayout(self.row5)
         master.addLayout(self.row6)
         master.addLayout(self.row7)
+        #master.addLayout(result)
 
         central_widget.setLayout(master)
         self.setCentralWidget(central_widget)
@@ -122,6 +141,8 @@ class Main(QMainWindow):
         for userCard in self.userCards:
             userCard.setPixmap(scaled_back_card)
             
+    def flashText(self):
+        pass
 
     def handle_buttonclick(self):
         self.button_bet.clicked.connect(self.bet)
@@ -191,15 +212,13 @@ class Main(QMainWindow):
             else:
                 self.reactTo_game_state('start')
         elif e.key() == Qt.Key_S:
+            result = self.blackjack.stand(self.dealerCards)
 
-            self.blackjack.stand()
         elif e.key() == Qt.Key_D:
-            Blackjack.double()
+            self.blackjack.double()
         elif e.key() == Qt.Key_C:
             self.cleargame()
 
-
-        
 
 if __name__ == "__main__":
     App = QApplication(sys.argv)
