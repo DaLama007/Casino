@@ -16,7 +16,11 @@ class Blackjack:
         type = random.randint(1,4)
         rank = random.randint(1,13)
         card = "card_"+str(type)+"_"+str(rank)+".png"
-        self.points_player+=rank
+        if rank>10:
+            self.points_player+=10
+        else:
+            self.points_player+=rank
+        
         return card
 
     def hit(self):
@@ -29,6 +33,10 @@ class Blackjack:
         pass
 
     def iswon(self):
-        if self.state == "true":
-            pass
+        if self.points_dealer < self.points_player and self.points_dealer<21:
+            return 'win'
+        elif self.points_dealer == self.points_player:
+            return 'equal'
+        else:
+            return 'lost'
     

@@ -15,6 +15,7 @@ class Main(QMainWindow):
         self.handle_buttonclick()
         
         
+        
 
     def settings(self):
         custom_font = QFont("Times", 30, QFont.Bold)
@@ -44,6 +45,8 @@ class Main(QMainWindow):
                 background-color: #3399ff; /* Lighter background color for buttons on hover */
             }
         """)
+        self.info_label = QLabel()
+
         central_widget = QWidget()
         userMoney = QLabel("Money")
         current_bet = QLabel('Curr Bet:')
@@ -115,16 +118,10 @@ class Main(QMainWindow):
     
     def cleargame(self):
         image_card1 = QPixmap('Cards/card_extra_back_1.png')
-
         scaled_back_card = image_card1.scaled(image_card1.width() * 4, image_card1.height() * 4)
-        self.userCard1.setPixmap(scaled_back_card)
-        self.userCard2.setPixmap(scaled_back_card)
-        self.userCard3.setPixmap(scaled_back_card)
-        self.userCard4.setPixmap(scaled_back_card)
-        self.userCard5.setPixmap(scaled_back_card)
-        self.userCard6.setPixmap(scaled_back_card)
-
-        self.game_state="start"
+        for userCard in self.userCards:
+            userCard.setPixmap(scaled_back_card)
+            
 
     def handle_buttonclick(self):
         self.button_bet.clicked.connect(self.bet)
@@ -163,7 +160,13 @@ class Main(QMainWindow):
             self.current_bet_display.setStyleSheet(self.error_stylesheet)
             self.input_bet.setText("")
 
-        
+    def reactTo_game_state(self, str):
+        if str=='start':
+            self.cleargame()
+        elif str == 'dealer':
+            pass
+        else:
+            pass
         
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_F11:
@@ -172,18 +175,24 @@ class Main(QMainWindow):
             self.close()
         elif e.key() == Qt.Key_H:
             image_card_old = QPixmap('Cards/card_extra_back_1.png')
-            for card in self.userCards:
-                if card.pixmap().toImage() == image_card_old.scaled(image_card_old.width() * 4, image_card_old.height() * 4).toImage():
-                    image_card_new = QPixmap('Cards/'+self.blackjack.hit())
-                    image_card_new_scaled = image_card_new.scaled(image_card_new.width() * 4, image_card_new.height() * 4)
-                    card.setPixmap(image_card_new_scaled)
-                    break
-            else:
-                self.game_state = "start"
-
+            if self.blackjack.points_player <21:
+                for card in self.userCards:
+                    if card.pixmap().toImage() == image_card_old.scaled(image_card_old.width() * 4, image_card_old.height() * 4).toImage():
+                        image_card_new = QPixmap('Cards/'+self.blackjack.hit())
+                        image_card_new_scaled = image_card_new.scaled(image_card_new.width() * 4, image_card_new.height() * 4)
+                        card.setPixmap(image_card_new_scaled)
+                        break
+                else:
+                    self.game_state = "dealer"
             
+            elif self.blackjack.points_player == 21:
+                self.game_state = "dealer"
+            
+            else:
+                self.reactTo_game_state('start')
         elif e.key() == Qt.Key_S:
-            Blackjack.stand()
+
+            self.blackjack.stand()
         elif e.key() == Qt.Key_D:
             Blackjack.double()
         elif e.key() == Qt.Key_C:
