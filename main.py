@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QPushButton, QLabel, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLineEdit
-from PyQt5.QtGui import QPixmap, QFont
-from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap, QFont, QPalette
+from PyQt5.QtCore import *
+import time
 
 import sys
 from blackjack import Blackjack
@@ -8,64 +9,93 @@ from blackjack import Blackjack
 class Main(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.game_state="start"
         self.settings()
         self.initUi()
+        self.handle_buttonclick()
         
         
 
     def settings(self):
         custom_font = QFont("Times", 30, QFont.Bold)
+        self.normal_stylesheet = "color : white"
         QApplication.setFont(custom_font)
         self.setWindowTitle("Casino")
         self.showFullScreen()
         
 
     def initUi(self):
+        self.error_stylesheet = "color : red"
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #333; /* Darker background color */
+                color: #fff; /* Text color */
+            }
+
+            QPushButton {
+                background-color: #66a3ff; /* Lighter background color for buttons */
+                color: #333; /* Text color for buttons */
+                border: 1px solid #fff; /* White border for buttons */
+                border-radius: 5px; /* Rounded corners for buttons */
+                padding: 5px 10px; /* Padding for buttons */
+            }
+
+            QPushButton:hover {
+                background-color: #3399ff; /* Lighter background color for buttons on hover */
+            }
+        """)
         central_widget = QWidget()
         userMoney = QLabel("Money")
         current_bet = QLabel('Curr Bet:')
+        self.current_bet_display = QLabel('---')
         label_bet = QLabel('Bet:')
-        input_bet = QLineEdit()
-        userCard1 = QLabel('card1')
-        userCard2 = QLabel('card2')
+        self.input_bet = QLineEdit(self)
+        self.button_bet = QPushButton("Bet")
+        
+        self.userCard1 = QLabel()
+        image_card1 = QPixmap('Cards/card_extra_back_1.png')
+        self.userCard2 = QLabel()
+        image_card2 = QPixmap('Cards/card_extra_back_1.png')
+        scaled_card1 = image_card1.scaled(image_card1.width() * 4, image_card1.height() * 4)
+        scaled_card2 = image_card2.scaled(image_card2.width() * 4, image_card2.height() * 4)
+        self.userCard1.setPixmap(scaled_card1)
+        self.userCard2.setPixmap(scaled_card2)
+
         Instruction1 = QLabel("H for Hit")
         Instruction2 = QLabel("S for Stand")
         Instruction3 = QLabel("D for Double")
-        
-
-        button_hit = QPushButton()
-        button_stand = QPushButton()
-        button_double = QPushButton()
 
         
-        row1 = QHBoxLayout()
-        row2 = QHBoxLayout()
-        row3 = QHBoxLayout()
-        row4 = QHBoxLayout()
-        row5 = QHBoxLayout()
-        row6 = QHBoxLayout()
-        row7 = QHBoxLayout()
+        self.row1 = QHBoxLayout()
+        self.row2 = QHBoxLayout()
+        self.row3 = QHBoxLayout()
+        self.row4 = QHBoxLayout()
+        self.row5 = QHBoxLayout()
+        self.row6 = QHBoxLayout()
+        self.row7 = QHBoxLayout()
         
         
         
-        row1.addWidget(userMoney)
-        row6.addWidget(label_bet)
-        row6.addWidget(input_bet)
-        row5.addWidget(userCard1)
-        row5.addWidget(userCard2)
-        row5.addWidget(current_bet)
-        row7.addWidget(Instruction1)
-        row7.addWidget(Instruction2)
-        row7.addWidget(Instruction3)
+        self.row1.addWidget(userMoney)
+        self.row6.addWidget(label_bet)
+        self.row6.addWidget(self.input_bet)
+        self.row6.addWidget(self.button_bet)
+        self.row5.addWidget(self.userCard1)
+        self.row5.addWidget(self.userCard2)
+        self.row5.addWidget(current_bet)
+        self.row5.addWidget(self.current_bet_display)
+        self.row7.addWidget(Instruction1)
+        self.row7.addWidget(Instruction2)
+        self.row7.addWidget(Instruction3)
         
         master= QVBoxLayout()
-        master.addLayout(row1)
-        master.addLayout(row2)
-        master.addLayout(row3)
-        master.addLayout(row4)
-        master.addLayout(row5)
-        master.addLayout(row6)
-        master.addLayout(row7)
+        master.addLayout(self.row1)
+        master.addLayout(self.row2)
+        master.addLayout(self.row3)
+        master.addLayout(self.row4)
+        master.addLayout(self.row5)
+        master.addLayout(self.row6)
+        master.addLayout(self.row7)
 
         central_widget.setLayout(master)
         self.setCentralWidget(central_widget)
@@ -77,6 +107,51 @@ class Main(QMainWindow):
         self.userCard4
         self.userCard5
         self.userCard6
+    
+    def cleargame(self):
+        self.userCard1.clear()
+        self.userCard2.clear()
+        #self.userCard3.clear()
+
+    def handle_buttonclick(self):
+        self.button_bet.clicked.connect(self.bet)
+
+    def bet(self):
+        if self.game_state == "start":
+            bet_value = self.input_bet.text()
+            
+            if bet_value.isdigit(): 
+                bet_digit = int(bet_value)
+                if bet_digit>0 and bet_digit<1000000:
+                    self.current_bet_display.setText(bet_value)
+                    self.input_bet.setText("")
+                    self.user_bet = bet_digit
+                    self.game_state = "during"
+                    Blackjack.__init__(self)
+                    card1 = Blackjack.get_card_user(self)
+                    card2 = Blackjack.get_card_user(self)   
+                    image_card1 = QPixmap("Cards/"+card1)
+                    image_card2 = QPixmap("Cards/"+card2)
+                    scaled_card1 = image_card1.scaled(image_card1.width() * 4, image_card1.height() * 4)
+                    scaled_card2 = image_card2.scaled(image_card2.width() * 4, image_card2.height() * 4)
+                    self.userCard1.setPixmap(scaled_card1)
+                    self.userCard2.setPixmap(scaled_card2)
+                else:
+                    self.current_bet_display.setText("Too big!")
+                    self.current_bet_display.setStyleSheet(self.error_stylesheet)
+                    self.input_bet.setText("")
+            else:
+                self.current_bet_display.setText("Enter a number!")
+                self.input_bet.setText("")
+                self.current_bet_display.setStyleSheet(self.error_stylesheet)
+        
+        else:
+            self.current_bet_display.setText("The game has already started!")
+            self.current_bet_display.setStyleSheet(self.error_stylesheet)
+            self.input_bet.setText("")
+
+        
+        
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_F11:
             self.showNormal()
@@ -84,6 +159,10 @@ class Main(QMainWindow):
             self.close()
         elif e.key() == Qt.Key_H:
             Blackjack.hit()
+        elif e.key() == Qt.Key_S:
+            Blackjack.stand()
+        elif e.key() == Qt.Key_D:
+            Blackjack.double()
 
 
         
@@ -93,4 +172,3 @@ if __name__ == "__main__":
     window = Main()
     window.show()
     App.exec()
-
