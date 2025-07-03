@@ -5,6 +5,7 @@ class Blackjack:
         self.state = "start"
         self.points_dealer = 0
         self.points_player = 0
+        
 
     def get_card_dealer(self):
         type = random.randint(1,4)

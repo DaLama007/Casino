@@ -52,22 +52,16 @@ class Main(QMainWindow):
         self.input_bet = QLineEdit(self)
         self.button_bet = QPushButton("Bet")
         
-        self.userCard1 = QLabel()
-        self.userCard2 = QLabel()
-        self.userCard3 = QLabel()
-        self.userCard4 = QLabel()
-        self.userCard5 = QLabel()
-        self.userCard6 = QLabel()
+        
         image_card1 = QPixmap('Cards/card_extra_back_1.png')
-        
-        
         scaled_back_card = image_card1.scaled(image_card1.width() * 4, image_card1.height() * 4)
-        self.userCard1.setPixmap(scaled_back_card)
-        self.userCard2.setPixmap(scaled_back_card)
-        self.userCard3.setPixmap(scaled_back_card)
-        self.userCard4.setPixmap(scaled_back_card)
-        self.userCard5.setPixmap(scaled_back_card)
-        self.userCard6.setPixmap(scaled_back_card)
+
+        self.userCards = []
+
+        for i in range(0,6):
+            userCard = QLabel()
+            userCard.setPixmap(scaled_back_card)
+            self.userCards.append(userCard)
 
         Instruction1 = QLabel("H for Hit")
         Instruction2 = QLabel("S for Stand")
@@ -88,12 +82,8 @@ class Main(QMainWindow):
         self.row6.addWidget(label_bet)
         self.row6.addWidget(self.input_bet)
         self.row6.addWidget(self.button_bet)
-        self.row5.addWidget(self.userCard1)
-        self.row5.addWidget(self.userCard2)
-        self.row5.addWidget(self.userCard3)
-        self.row5.addWidget(self.userCard4)
-        self.row5.addWidget(self.userCard5)
-        self.row5.addWidget(self.userCard6)
+        for card in self.userCards:
+            self.row5.addWidget(card)
         self.row5.addWidget(current_bet)
         self.row5.addWidget(self.current_bet_display)
         self.row7.addWidget(Instruction1)
@@ -150,15 +140,15 @@ class Main(QMainWindow):
                     self.input_bet.setText("")
                     self.user_bet = bet_digit
                     self.game_state = "during"
-                    Blackjack.__init__(self)
-                    card1 = Blackjack.get_card_user(self)
-                    card2 = Blackjack.get_card_user(self)   
+                    self.blackjack = Blackjack()
+                    card1 = self.blackjack.get_card_user()
+                    card2 = self.blackjack.get_card_user()   
                     image_card1 = QPixmap("Cards/"+card1)
                     image_card2 = QPixmap("Cards/"+card2)
                     scaled_card1 = image_card1.scaled(image_card1.width() * 4, image_card1.height() * 4)
                     scaled_card2 = image_card2.scaled(image_card2.width() * 4, image_card2.height() * 4)
-                    self.userCard1.setPixmap(scaled_card1)
-                    self.userCard2.setPixmap(scaled_card2)
+                    self.userCards[0].setPixmap(scaled_card1)
+                    self.userCards[1].setPixmap(scaled_card2)
                 else:
                     self.current_bet_display.setText("Too big!")
                     self.current_bet_display.setStyleSheet(self.error_stylesheet)
@@ -181,8 +171,17 @@ class Main(QMainWindow):
         elif e.key() == Qt.Key_Escape:
             self.close()
         elif e.key() == Qt.Key_H:
+            image_card_old = QPixmap('Cards/card_extra_back_1.png')
+            for card in self.userCards:
+                if card.pixmap().toImage() == image_card_old.scaled(image_card_old.width() * 4, image_card_old.height() * 4).toImage():
+                    image_card_new = QPixmap('Cards/'+self.blackjack.hit())
+                    image_card_new_scaled = image_card_new.scaled(image_card_new.width() * 4, image_card_new.height() * 4)
+                    card.setPixmap(image_card_new_scaled)
+                    break
+            else:
+                self.game_state = "start"
+
             
-            Blackjack.hit()
         elif e.key() == Qt.Key_S:
             Blackjack.stand()
         elif e.key() == Qt.Key_D:
