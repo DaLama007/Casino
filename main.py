@@ -198,11 +198,11 @@ class Main(QMainWindow):
     def loss(self):
         self.userMoney-=self.user_bet
         self.label_userMoney.setText(str(self.userMoney))
+        QTimer.singleShot(1000,self.cleargame)
     def win(self):
         self.userMoney+=self.user_bet
         self.label_userMoney.setText(str(self.userMoney))
-        time.sleep(1)
-        self.cleargame()
+        QTimer.singleShot(1000,self.cleargame)
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_F11:
             self.showNormal()
@@ -220,11 +220,13 @@ class Main(QMainWindow):
                             self.loss()
                         break
                 else:
-                    self.blackjack.stand(self.dealerCards)
+                    for card in self.dealerCards:
+                        QTimer.singleShot(1000,self.blackjack.stand(card))
                     self.game_state = "start"
             
             elif self.blackjack.points_player == 21:
-                self.blackjack.stand(self.dealerCards)
+                for card in self.dealerCards:
+                    QTimer.singleShot(1000,self.blackjack.stand(card))
                 self.game_state = "start"
                 
             
@@ -233,9 +235,10 @@ class Main(QMainWindow):
                 
 
         elif e.key() == Qt.Key_S:
-            result=self.blackjack.stand(self.dealerCards)
-            QTimer.singleShot(1000,self.cleargame)
-            QApplication.processEvents()
+            result = self.blackjack.reveal(QApplication, self.dealerCards)
+            
+
+            
 
             if result=='lost':
                 self.loss()

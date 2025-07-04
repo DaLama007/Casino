@@ -1,5 +1,6 @@
 import random
 from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 import time
 
 class Blackjack:
@@ -36,18 +37,22 @@ class Blackjack:
     def double():
         pass
 
-    def stand(self, card_array):
-        for card in card_array:
-                
-            if self.points_dealer<17:
-                new_card = self.get_card_dealer()   
-                image_card = QPixmap("Cards/"+new_card)
-                scaled_card = image_card.scaled(image_card.width() * 4, image_card.height() * 4)
-                card.setPixmap(scaled_card)
+    def stand(self, card):
+        if self.points_dealer<17:
+            new_card = self.get_card_dealer()    
+            image_card = QPixmap("Cards/"+new_card)
+            scaled_card = image_card.scaled(image_card.width() * 4, image_card.height() * 4)
+            card.setPixmap(scaled_card)
                 
         
-        return self.iswon()
+        
 
+    def reveal(self,QApplication, card_array):
+        for card in card_array:
+                time.sleep(1)
+                result=self.stand(card=card)
+                QApplication.processEvents()
+        return self.iswon()
 
     def iswon(self):
         if (self.points_dealer < self.points_player and self.points_dealer<21)or self.points_dealer>21:
