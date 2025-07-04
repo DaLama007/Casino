@@ -1,5 +1,6 @@
 import random
 from PyQt5.QtGui import *
+import time
 
 class Blackjack:
     def __init__(self):
@@ -37,17 +38,19 @@ class Blackjack:
 
     def stand(self, card_array):
         for card in card_array:
+                
             if self.points_dealer<17:
                 new_card = self.get_card_dealer()   
                 image_card = QPixmap("Cards/"+new_card)
                 scaled_card = image_card.scaled(image_card.width() * 4, image_card.height() * 4)
                 card.setPixmap(scaled_card)
+                
         
         return self.iswon()
 
 
     def iswon(self):
-        if self.points_dealer < self.points_player and self.points_dealer<21:
+        if (self.points_dealer < self.points_player and self.points_dealer<21)or self.points_dealer>21:
             return 'win'
         elif self.points_dealer == self.points_player:
             return 'equal'

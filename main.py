@@ -9,10 +9,12 @@ from blackjack import Blackjack
 class Main(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.userMoney =  1000
         self.game_state="start"
         self.settings()
         self.initUi()
         self.handle_buttonclick()
+        
         
         
         
@@ -45,10 +47,11 @@ class Main(QMainWindow):
                 background-color: #3399ff; /* Lighter background color for buttons on hover */
             }
         """)
-        #self.label_result = QLabel("Hello").setAlignment(Qt.AlignCenter)
+        self.label_result = QLabel("Hellowwwwwwwwwwww").setAlignment(Qt.AlignCenter)
 
         central_widget = QWidget()
-        userMoney = QLabel("Money")
+        label_Money = QLabel("Money:")
+        self.label_userMoney = QLabel(str(self.userMoney))
         current_bet = QLabel('Curr Bet:')
         self.current_bet_display = QLabel('---')
         label_bet = QLabel('Bet:')
@@ -93,9 +96,8 @@ class Main(QMainWindow):
         self.row6 = QHBoxLayout()
         self.row7 = QHBoxLayout()
         
-        
-        
-        self.row1.addWidget(userMoney)
+        self.row1.addWidget(label_Money)
+        self.row1.addWidget(self.label_userMoney)
         self.row6.addWidget(label_bet)
         self.row6.addWidget(self.input_bet)
         self.row6.addWidget(self.button_bet)
@@ -113,8 +115,6 @@ class Main(QMainWindow):
         self.row5.setContentsMargins(0, 0, 0, 0)
 
         master= QVBoxLayout()
-        result= QVBoxLayout()
-        #result.addWidget(self.label_result, alignment=Qt.AlignCenter)
         master.addLayout(self.row1)
         master.addLayout(self.row2)
         master.addLayout(self.row3)
@@ -122,10 +122,11 @@ class Main(QMainWindow):
         master.addLayout(self.row5)
         master.addLayout(self.row6)
         master.addLayout(self.row7)
-        #master.addLayout(result)
-
+        
         central_widget.setLayout(master)
         self.setCentralWidget(central_widget)
+        self.overlay = QWidget(self.label_result)
+        self.overlay.raise_()
     
     def updateCards(self):
         self.userCard1
@@ -140,6 +141,11 @@ class Main(QMainWindow):
         scaled_back_card = image_card1.scaled(image_card1.width() * 4, image_card1.height() * 4)
         for userCard in self.userCards:
             userCard.setPixmap(scaled_back_card)
+
+        image_card1 = QPixmap('Cards/card_extra_back_2.png')
+        scaled_back_card = image_card1.scaled(image_card1.width() * 4, image_card1.height() * 4)
+        for dealerCard in self.dealerCards:
+            dealerCard.setPixmap(scaled_back_card)
             
     def flashText(self):
         pass
@@ -149,7 +155,8 @@ class Main(QMainWindow):
 
     def bet(self):
         if self.game_state == "start":
-            bet_value = self.input_bet.text()
+            self.cleargame()
+            bet_value = self.input_bet.text().replace(" ", "")
             
             if bet_value.isdigit(): 
                 bet_digit = int(bet_value)
@@ -168,7 +175,7 @@ class Main(QMainWindow):
                     self.userCards[0].setPixmap(scaled_card1)
                     self.userCards[1].setPixmap(scaled_card2)
                 else:
-                    self.current_bet_display.setText("Too big!")
+                    self.current_bet_display.setText("Too small/big!")
                     self.current_bet_display.setStyleSheet(self.error_stylesheet)
                     self.input_bet.setText("")
             else:
@@ -188,7 +195,14 @@ class Main(QMainWindow):
             pass
         else:
             pass
-        
+    def loss(self):
+        self.userMoney-=self.user_bet
+        self.label_userMoney.setText(str(self.userMoney))
+    def win(self):
+        self.userMoney+=self.user_bet
+        self.label_userMoney.setText(str(self.userMoney))
+        time.sleep(1)
+        self.cleargame()
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_F11:
             self.showNormal()
@@ -202,22 +216,39 @@ class Main(QMainWindow):
                         image_card_new = QPixmap('Cards/'+self.blackjack.hit())
                         image_card_new_scaled = image_card_new.scaled(image_card_new.width() * 4, image_card_new.height() * 4)
                         card.setPixmap(image_card_new_scaled)
+                        if self.blackjack.points_player >21:
+                            self.loss()
                         break
                 else:
-                    self.game_state = "dealer"
+                    self.blackjack.stand(self.dealerCards)
+                    self.game_state = "start"
             
             elif self.blackjack.points_player == 21:
-                self.game_state = "dealer"
+                self.blackjack.stand(self.dealerCards)
+                self.game_state = "start"
+                
             
             else:
-                self.reactTo_game_state('start')
-        elif e.key() == Qt.Key_S:
-            result = self.blackjack.stand(self.dealerCards)
+                self.game_state = "start"
+                
 
+        elif e.key() == Qt.Key_S:
+            result=self.blackjack.stand(self.dealerCards)
+            QTimer.singleShot(1000,self.cleargame)
+            QApplication.processEvents()
+
+            if result=='lost':
+                self.loss()
+                self.game_state = "start"
+            elif result =="win":
+                self.win()
+
+            self.game_state = "start"
         elif e.key() == Qt.Key_D:
             self.blackjack.double()
         elif e.key() == Qt.Key_C:
             self.cleargame()
+            self.game_state = "start"
 
 
 if __name__ == "__main__":
