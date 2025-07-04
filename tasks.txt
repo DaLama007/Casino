@@ -1,0 +1,10 @@
+Tasks blackjack unfinished:
+- Fix Ui
+- Fix game started
+- Fix money unlimited bug
+- Create DB
+
+Games to add:
+- Roulette(easy, ui hard)
+- Poker(hard)
+- Slot machine

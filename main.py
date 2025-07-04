@@ -47,7 +47,7 @@ class Main(QMainWindow):
                 background-color: #3399ff; /* Lighter background color for buttons on hover */
             }
         """)
-        self.label_result = QLabel("Hellowwwwwwwwwwww").setAlignment(Qt.AlignCenter)
+        self.label_result = QLabel("...",self)
 
         central_widget = QWidget()
         label_Money = QLabel("Money:")
@@ -60,7 +60,7 @@ class Main(QMainWindow):
         
         
         image_card1 = QPixmap('Cards/card_extra_back_1.png')
-        scaled_back_card = image_card1.scaled(image_card1.width() * 4, image_card1.height() * 4)
+        scaled_back_card = image_card1.scaled(image_card1.width() * 5, image_card1.height() * 5)
 
         self.userCards = []
 
@@ -72,7 +72,7 @@ class Main(QMainWindow):
         #DEALER CARDS
 
         image_card = QPixmap('Cards/card_extra_back_2.png')
-        scaled_back_card = image_card.scaled(image_card.width() * 4, image_card.height() * 4)
+        scaled_back_card = image_card.scaled(image_card.width() * 5, image_card.height() * 5)
 
         self.dealerCards = []
 
@@ -124,10 +124,18 @@ class Main(QMainWindow):
         master.addLayout(self.row7)
         
         central_widget.setLayout(master)
+        
         self.setCentralWidget(central_widget)
-        self.overlay = QWidget(self.label_result)
-        self.overlay.raise_()
-    
+        
+        self.label_result.setAlignment(Qt.AlignCenter)
+        self.label_result.setStyleSheet("""
+            background-color: rgba(0, 0, 0, 150); 
+            color: white; 
+            font-size: 48px;
+        """)
+        self.label_result.setGeometry(0, 0, self.width(), self.height())
+        self.label_result.raise_()
+        self.label_result.hide()
     def updateCards(self):
         self.userCard1
         self.userCard2
@@ -138,17 +146,19 @@ class Main(QMainWindow):
     
     def cleargame(self):
         image_card1 = QPixmap('Cards/card_extra_back_1.png')
-        scaled_back_card = image_card1.scaled(image_card1.width() * 4, image_card1.height() * 4)
+        scaled_back_card = image_card1.scaled(image_card1.width() * 5, image_card1.height() * 5)
         for userCard in self.userCards:
             userCard.setPixmap(scaled_back_card)
 
         image_card1 = QPixmap('Cards/card_extra_back_2.png')
-        scaled_back_card = image_card1.scaled(image_card1.width() * 4, image_card1.height() * 4)
+        scaled_back_card = image_card1.scaled(image_card1.width() * 5, image_card1.height() * 5)
         for dealerCard in self.dealerCards:
             dealerCard.setPixmap(scaled_back_card)
             
-    def flashText(self):
-        pass
+    def flashText(self,message):
+        self.label_result.setText(message)
+        self.label_result.show()
+        QTimer.singleShot(1000,self.label_result.hide)
 
     def handle_buttonclick(self):
         self.button_bet.clicked.connect(self.bet)
@@ -170,8 +180,8 @@ class Main(QMainWindow):
                     card2 = self.blackjack.get_card_user()   
                     image_card1 = QPixmap("Cards/"+card1)
                     image_card2 = QPixmap("Cards/"+card2)
-                    scaled_card1 = image_card1.scaled(image_card1.width() * 4, image_card1.height() * 4)
-                    scaled_card2 = image_card2.scaled(image_card2.width() * 4, image_card2.height() * 4)
+                    scaled_card1 = image_card1.scaled(image_card1.width() * 5, image_card1.height() * 5)
+                    scaled_card2 = image_card2.scaled(image_card2.width() * 5, image_card2.height() * 5)
                     self.userCards[0].setPixmap(scaled_card1)
                     self.userCards[1].setPixmap(scaled_card2)
                 else:
@@ -199,10 +209,12 @@ class Main(QMainWindow):
         self.userMoney-=self.user_bet
         self.label_userMoney.setText(str(self.userMoney))
         QTimer.singleShot(1000,self.cleargame)
+        self.flashText("Lost")
     def win(self):
         self.userMoney+=self.user_bet
         self.label_userMoney.setText(str(self.userMoney))
         QTimer.singleShot(1000,self.cleargame)
+        self.flashText("Won")
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_F11:
             self.showNormal()
@@ -212,9 +224,9 @@ class Main(QMainWindow):
             image_card_old = QPixmap('Cards/card_extra_back_1.png')
             if self.blackjack.points_player <21:
                 for card in self.userCards:
-                    if card.pixmap().toImage() == image_card_old.scaled(image_card_old.width() * 4, image_card_old.height() * 4).toImage():
+                    if card.pixmap().toImage() == image_card_old.scaled(image_card_old.width() * 5, image_card_old.height() * 5).toImage():
                         image_card_new = QPixmap('Cards/'+self.blackjack.hit())
-                        image_card_new_scaled = image_card_new.scaled(image_card_new.width() * 4, image_card_new.height() * 4)
+                        image_card_new_scaled = image_card_new.scaled(image_card_new.width() * 5, image_card_new.height() * 5)
                         card.setPixmap(image_card_new_scaled)
                         if self.blackjack.points_player >21:
                             self.loss()
